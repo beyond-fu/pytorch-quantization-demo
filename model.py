@@ -6,19 +6,21 @@ from module import *
 
 
 class Net(nn.Module):
-
     def __init__(self, num_channels=1):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(num_channels, 40, 3, 1)
+        self.conv1 = nn.Conv2d(
+            num_channels, 40, 3, 1
+        )  # in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias=True, ...
         self.conv2 = nn.Conv2d(40, 40, 3, 1, groups=20)
-        self.fc = nn.Linear(5*5*40, 10)
+        self.fc = nn.Linear(5 * 5 * 40, 10)
 
+    # conv -> relu -> maxpool -> relu -> maxpool -> view(reshape) -> fc
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.max_pool2d(x, 2, 2)
         x = F.relu(self.conv2(x))
         x = F.max_pool2d(x, 2, 2)
-        x = x.view(-1, 5*5*40)
+        x = x.view(-1, 5 * 5 * 40)
         x = self.fc(x)
         return x
 
@@ -32,16 +34,17 @@ class Net(nn.Module):
         self.qfc = QLinear(self.fc, qi=False, qo=True, num_bits=num_bits)
 
     def quantize_forward(self, x):
-        x = self.qconv1(x)
+        x = self.qconv1(x)  # calling `forward` function
         x = self.qrelu1(x)
         x = self.qmaxpool2d_1(x)
         x = self.qconv2(x)
         x = self.qrelu2(x)
         x = self.qmaxpool2d_2(x)
-        x = x.view(-1, 5*5*40)
+        x = x.view(-1, 5 * 5 * 40)
         x = self.qfc(x)
         return x
 
+    # calculate constants
     def freeze(self):
         self.qconv1.freeze()
         self.qrelu1.freeze(self.qconv1.qo)
@@ -59,14 +62,13 @@ class Net(nn.Module):
         qx = self.qconv2.quantize_inference(qx)
         qx = self.qrelu2.quantize_inference(qx)
         qx = self.qmaxpool2d_2.quantize_inference(qx)
-        qx = qx.view(-1, 5*5*40)
+        qx = qx.view(-1, 5 * 5 * 40)
         qx = self.qfc.quantize_inference(qx)
         out = self.qfc.qo.dequantize_tensor(qx)
         return out
 
 
 class NetBN(nn.Module):
-
     def __init__(self, num_channels=1):
         super(NetBN, self).__init__()
         self.conv1 = nn.Conv2d(num_channels, 40, 3, 1)
@@ -89,9 +91,13 @@ class NetBN(nn.Module):
         return x
 
     def quantize(self, num_bits=8):
-        self.qconv1 = QConvBNReLU(self.conv1, self.bn1, qi=True, qo=True, num_bits=num_bits)
+        self.qconv1 = QConvBNReLU(
+            self.conv1, self.bn1, qi=True, qo=True, num_bits=num_bits
+        )
         self.qmaxpool2d_1 = QMaxPooling2d(kernel_size=2, stride=2, padding=0)
-        self.qconv2 = QConvBNReLU(self.conv2, self.bn2, qi=False, qo=True, num_bits=num_bits)
+        self.qconv2 = QConvBNReLU(
+            self.conv2, self.bn2, qi=False, qo=True, num_bits=num_bits
+        )
         self.qmaxpool2d_2 = QMaxPooling2d(kernel_size=2, stride=2, padding=0)
         self.qfc = QLinear(self.fc, qi=False, qo=True, num_bits=num_bits)
 
@@ -100,7 +106,7 @@ class NetBN(nn.Module):
         x = self.qmaxpool2d_1(x)
         x = self.qconv2(x)
         x = self.qmaxpool2d_2(x)
-        x = x.view(-1, 5*5*40)
+        x = x.view(-1, 5 * 5 * 40)
         x = self.qfc(x)
         return x
 
@@ -117,9 +123,9 @@ class NetBN(nn.Module):
         qx = self.qmaxpool2d_1.quantize_inference(qx)
         qx = self.qconv2.quantize_inference(qx)
         qx = self.qmaxpool2d_2.quantize_inference(qx)
-        qx = qx.view(-1, 5*5*40)
+        qx = qx.view(-1, 5 * 5 * 40)
 
         qx = self.qfc.quantize_inference(qx)
-        
+
         out = self.qfc.qo.dequantize_tensor(qx)
         return out
