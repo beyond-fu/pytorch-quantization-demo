@@ -14,6 +14,7 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(40, 40, 3, 1, groups=20)
         self.fc = nn.Linear(5 * 5 * 40, 10)
 
+    # inference for training
     # conv -> relu -> maxpool -> relu -> maxpool -> view(reshape) -> fc
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -33,8 +34,9 @@ class Net(nn.Module):
         self.qmaxpool2d_2 = QMaxPooling2d(kernel_size=2, stride=2, padding=0)
         self.qfc = QLinear(self.fc, qi=False, qo=True, num_bits=num_bits)
 
+    # calling `forward` function, inference on float with fake quantization error
     def quantize_forward(self, x):
-        x = self.qconv1(x)  # calling `forward` function
+        x = self.qconv1(x)
         x = self.qrelu1(x)
         x = self.qmaxpool2d_1(x)
         x = self.qconv2(x)
@@ -77,6 +79,7 @@ class NetBN(nn.Module):
         self.bn2 = nn.BatchNorm2d(40)
         self.fc = nn.Linear(5 * 5 * 40, 10)
 
+    # inference for training
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)

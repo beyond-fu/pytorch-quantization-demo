@@ -12,7 +12,9 @@ def train(model, device, train_loader, optimizer, epoch):
     # Switch to training mode: enable training-time behavior; mainly affects Dropout and BatchNorm, modify the `training` flag to `True` for current module and all sub-modules
     model.train()
     lossLayer = torch.nn.CrossEntropyLoss()
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(
+        train_loader
+    ):  # iter for all batches(train set)
         data, target = (
             data.to(device),
             target.to(device),
@@ -21,7 +23,7 @@ def train(model, device, train_loader, optimizer, epoch):
         output = model(data)  # feed input data, get inference result
         loss = lossLayer(output, target)  # calc loss
         loss.backward()  # backpropogation
-        optimizer.step()  # update parameters of model using SDG optimizer
+        optimizer.step()  # update parameters(weights) of model using SDG optimizer, momentum and calculated grad of last step
 
         if batch_idx % 50 == 0:
             print(
@@ -37,7 +39,7 @@ def test(model, device, test_loader):
     test_loss = 0
     correct = 0
     lossLayer = torch.nn.CrossEntropyLoss(reduction="sum")
-    for data, target in test_loader:
+    for data, target in test_loader:  # iter for all batches(test set)
         data, target = data.to(device), target.to(device)
         output = model(data)  # inference
         test_loss += lossLayer(output, target).item()
@@ -60,7 +62,7 @@ def test(model, device, test_loader):
 
 
 if __name__ == "__main__":
-    batch_size = 64  # for training
+    batch_size = 64  # for training, 64 pics for one batch
     test_batch_size = 64
     seed = 1
     epochs = 15
@@ -73,6 +75,10 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    """
+    MNIST: train sets: 60,000 pics
+           test sets: 10,000 pics
+    """
     train_loader = torch.utils.data.DataLoader(
         datasets.MNIST(
             "data",

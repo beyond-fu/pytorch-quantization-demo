@@ -79,7 +79,7 @@ class QParam(nn.Module):
         self.register_buffer("min", min)
         self.register_buffer("max", max)
 
-    # get max/min of given tensor
+    # get max/min of given tensor, then calc scale/zp
     def update(self, tensor):
         if self.max.nelement() == 0 or self.max.data < tensor.max().data:
             self.max.data = tensor.max().data
