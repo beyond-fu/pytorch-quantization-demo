@@ -10,6 +10,7 @@ class FakeQuantize(Function):
         return x
 
     @staticmethod
+    # the order of return of backward must correspond to input of forward
     def backward(ctx, grad_output):
         return grad_output, None
 
@@ -35,4 +36,3 @@ def interp(x: torch.Tensor, xp: torch.Tensor, fp: torch.Tensor) -> torch.Tensor:
     out = m[line_idx, indicies].mul(x_) + b[line_idx, indicies]
     out = out.reshape(x.shape)
     return out
-

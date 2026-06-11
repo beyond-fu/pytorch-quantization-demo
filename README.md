@@ -14,7 +14,7 @@ A simple network quantization demo using pytorch from scratch. This is the code 
       - clear grad of optimizer
       - calling `forward` function of model
       - get loss and backpropogation
-      - update weights of model using optimizer, momentum and calculated grad of last step
+      - update weights of model using optimizer, momentum and calculated grad of previous step
   - test
     - switch to eval mode
     - create loss function
@@ -23,7 +23,8 @@ A simple network quantization demo using pytorch from scratch. This is the code 
       - accumulate loss
       - accumulate num of correct
     - calc total_loss and accuracy
-- model(data) has the same calling order no matter model.eval() or model.train()
+- save mode
+- NOTE: model(data) has the same calling order no matter model.eval() or model.train()
 
 # INFERENCE
 
@@ -31,4 +32,10 @@ A simple network quantization demo using pytorch from scratch. This is the code 
 - load trained parameters
 - switch to eval mode
 - full inference to get accuracy before quantization
-- calling model.quantize to create Qxxx instance to be quantized
+- model.quantize() to initialize qxxx layer to be quantized
+- switch to eval mode, because of new created class instance in the previous step
+- exec quantization using train sets
+  - exec quantize_forward to calc min/max/scale/zp for a batch once
+- save model
+- model.freeze() to freeze scale/zp/weights/bias
+- quantize_inference() using test sets, inference a batch once

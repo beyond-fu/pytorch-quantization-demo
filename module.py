@@ -201,7 +201,7 @@ class QConv2d(QModule):
             padding=self.conv_module.padding,
             dilation=self.conv_module.dilation,
             groups=self.conv_module.groups,
-        )
+        )  # can not use `x=self.conv_module(x)`
 
         if hasattr(self, "qo"):
             self.qo.update(x)

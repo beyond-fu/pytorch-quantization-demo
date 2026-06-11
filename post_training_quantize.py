@@ -35,7 +35,7 @@ def full_inference(model, test_loader):
 def quantize_inference(model, test_loader):
     correct = 0
     for i, (data, target) in enumerate(test_loader, 1):
-        output = model.quantize_inference(data)
+        output = model.quantize_inference(data)  # inference a batch once
         pred = output.argmax(dim=1, keepdim=True)
         correct += pred.eq(target.view_as(pred)).sum().item()
     print(
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     full_inference(model, test_loader)
 
     num_bits = 8
-    model.quantize(num_bits=num_bits)
+    model.quantize(num_bits=num_bits)  # initialize, prepare to quantize
     model.eval()
     print("Quantization bit: %d" % num_bits)
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load(load_quant_model_file))
         print("Successfully load quantized model %s" % load_quant_model_file)
 
-    direct_quantize(model, train_loader)
+    direct_quantize(model, train_loader)  # exec quantize
 
     torch.save(model.state_dict(), save_file)
     model.freeze()
