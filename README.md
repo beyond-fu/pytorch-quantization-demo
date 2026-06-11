@@ -27,4 +27,8 @@ A simple network quantization demo using pytorch from scratch. This is the code 
 
 # INFERENCE
 
--
+- create model instance
+- load trained parameters
+- switch to eval mode
+- full inference to get accuracy before quantization
+- calling model.quantize to create Qxxx instance to be quantized
